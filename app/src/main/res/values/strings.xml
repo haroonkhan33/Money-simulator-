@@ -1,0 +1,51 @@
+<resources>
+    <string name="app_name">Money Tycoon</string>
+
+    <!-- Navigation -->
+    <string name="nav_jobs">Jobs</string>
+    <string name="nav_investments">Investments</string>
+    <string name="nav_trading">Trading</string>
+
+    <!-- Header Stats -->
+    <string name="header_corp_name">NEON VENTURES INC.</string>
+    <string name="header_prestige_badge">⚡ 2.5x BOOST</string>
+    <string name="header_level_badge">Rank #1 Tycoon</string>
+    <string name="header_net_worth_label">TOTAL NET WORTH</string>
+    <string name="header_cash_flow_label">MONTHLY CASH FLOW</string>
+    <string name="default_net_worth">$2,485,320</string>
+    <string name="default_cash_flow">+$184,500 / mo</string>
+    <string name="default_cash_flow_sec">(+$6,150 / sec)</string>
+    <string name="tap_to_mint_action">TAP TO MINT +$500</string>
+    <string name="view_xml_code">XML CODE</string>
+
+    <!-- Portfolio Grid -->
+    <string name="section_assets_title">BUSINESS ASSET GRID</string>
+    <string name="section_assets_count">6 ACTIVE</string>
+    <string name="filter_all">All</string>
+    <string name="filter_tech">Tech</string>
+    <string name="filter_energy">Energy</string>
+    <string name="filter_crypto">Crypto</string>
+
+    <!-- Asset Cards -->
+    <string name="asset_coffee_title">Quantum Cyber Café</string>
+    <string name="asset_crypto_title">Decentralized Mine</string>
+    <string name="asset_saas_title">Neural AI Platform</string>
+    <string name="asset_fleet_title">Autonomous EV Fleet</string>
+    <string name="asset_fusion_title">Fusion Reactor Grid</string>
+    <string name="asset_space_title">Orbital Cargo Station</string>
+
+    <string name="upgrade_label">UPGRADE</string>
+    <string name="level_format">LVL %1$d</string>
+    <string name="auto_collect_label">AUTO-RUN</string>
+    <string name="locked_label">LOCKED</string>
+
+    <!-- Jobs Tab -->
+    <string name="jobs_tab_title">CAREER &amp; SIDE HUSTLES</string>
+    <string name="jobs_salary_label">Hourly Wage</string>
+    <string name="work_shift_button">WORK SHIFT</string>
+
+    <!-- Trading Tab -->
+    <string name="trading_tab_title">NEON EXCHANGE (LIVE)</string>
+    <string name="trading_buy_button">BUY</string>
+    <string name="trading_sell_button">SELL</string>
+</resources>

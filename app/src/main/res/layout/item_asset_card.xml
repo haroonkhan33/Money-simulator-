@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/card_asset"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="6dp"
+    android:clickable="true"
+    android:focusable="true"
+    app:cardBackgroundColor="@color/bg_dark_card"
+    app:cardCornerRadius="@dimen/card_corner_medium"
+    app:cardElevation="@dimen/card_elevation"
+    app:rippleColor="@color/ripple_neon"
+    app:strokeColor="@color/neon_green_stroke"
+    app:strokeWidth="@dimen/card_stroke_width">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="14dp">
+
+        <!-- Top Header Row: Icon & Level Badge -->
+        <FrameLayout
+            android:id="@+id/icon_container"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:background="@drawable/bg_neon_badge"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/iv_asset_icon"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:layout_gravity="center"
+                android:contentDescription="@string/section_assets_title"
+                android:src="@drawable/ic_bolt"
+                app:tint="@color/neon_green_primary" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/tv_asset_level"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_neon_pill"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="3dp"
+            android:text="LVL 24"
+            android:textColor="@color/neon_green_primary"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="LVL 24" />
+
+        <!-- Business Title -->
+        <TextView
+            android:id="@+id/tv_asset_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textColor="@color/text_white"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/icon_container"
+            tools:text="Neural AI Platform" />
+
+        <!-- Production Rate -->
+        <LinearLayout
+            android:id="@+id/rate_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_asset_name">
+
+            <ImageView
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:layout_marginEnd="4dp"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_trending_up"
+                app:tint="@color/neon_green_primary" />
+
+            <TextView
+                android:id="@+id/tv_asset_rate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/neon_green_bright"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                tools:text="+$1,850/sec" />
+        </LinearLayout>
+
+        <!-- Progress Indicator for production cycle -->
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:id="@+id/progress_production"
+            style="@style/Widget.NeonTycoon.LinearProgressIndicator"
+            android:layout_width="0dp"
+            android:layout_height="6dp"
+            android:layout_marginTop="10dp"
+            android:progress="65"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/rate_container" />
+
+        <!-- Action / Upgrade Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_upgrade"
+            style="@style/Widget.NeonTycoon.Button.Primary"
+            android:layout_width="0dp"
+            android:layout_height="42dp"
+            android:layout_marginTop="12dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:paddingHorizontal="8dp"
+            android:text="UPGRADE $12.5K"
+            android:textSize="12sp"
+            app:cornerRadius="10dp"
+            app:icon="@drawable/ic_arrow_up"
+            app:iconGravity="textStart"
+            app:iconSize="14dp"
+            app:iconTint="@color/bg_dark_base"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/progress_production"
+            tools:text="UPGRADE $12.5K" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>

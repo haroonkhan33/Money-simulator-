@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base Application Theme -->
+    <style name="Theme.NeonTycoon" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="colorPrimary">@color/neon_green_primary</item>
+        <item name="colorOnPrimary">@color/bg_dark_base</item>
+        <item name="colorPrimaryContainer">@color/neon_green_surface_tint</item>
+        <item name="colorOnPrimaryContainer">@color/neon_green_bright</item>
+        <item name="colorSecondary">@color/accent_cyan</item>
+        <item name="colorSurface">@color/bg_dark_surface</item>
+        <item name="colorSurfaceVariant">@color/bg_dark_card</item>
+        <item name="colorOnSurface">@color/text_white</item>
+        <item name="colorOnSurfaceVariant">@color/text_secondary</item>
+        <item name="android:windowBackground">@color/bg_dark_base</item>
+        <item name="android:statusBarColor">@color/bg_dark_base</item>
+        <item name="android:navigationBarColor">@color/bg_nav_bar</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="materialCardViewStyle">@style/Widget.NeonTycoon.Card</item>
+        <item name="bottomNavigationStyle">@style/Widget.NeonTycoon.BottomNav</item>
+    </style>
+
+    <!-- Compatibility Theme alias for template -->
+    <style name="Theme.MyApplication" parent="Theme.NeonTycoon" />
+
+    <!-- Modern Sleek Rounded Card with Neon Stroke -->
+    <style name="Widget.NeonTycoon.Card" parent="Widget.Material3.CardView.Filled">
+        <item name="cardBackgroundColor">@color/bg_dark_card</item>
+        <item name="cardCornerRadius">@dimen/card_corner_medium</item>
+        <item name="cardElevation">@dimen/card_elevation</item>
+        <item name="strokeColor">@color/neon_green_stroke</item>
+        <item name="strokeWidth">@dimen/card_stroke_width</item>
+        <item name="rippleColor">@color/ripple_neon</item>
+    </style>
+
+    <!-- Header Stats Card -->
+    <style name="Widget.NeonTycoon.HeaderCard" parent="Widget.Material3.CardView.Filled">
+        <item name="cardBackgroundColor">@color/bg_dark_card</item>
+        <item name="cardCornerRadius">@dimen/card_corner_large</item>
+        <item name="cardElevation">8dp</item>
+        <item name="strokeColor">@color/neon_green_stroke</item>
+        <item name="strokeWidth">@dimen/card_stroke_width_thick</item>
+    </style>
+
+    <!-- Neon Glow Interactive Button -->
+    <style name="Widget.NeonTycoon.Button.Primary" parent="Widget.Material3.Button">
+        <item name="backgroundTint">@color/neon_green_primary</item>
+        <item name="android:textColor">@color/bg_dark_base</item>
+        <item name="android:textStyle">bold</item>
+        <item name="cornerRadius">@dimen/button_corner_radius</item>
+        <item name="rippleColor">@color/bg_dark_card</item>
+    </style>
+
+    <!-- Subtle Outline Button -->
+    <style name="Widget.NeonTycoon.Button.Outlined" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="strokeColor">@color/neon_green_stroke_bright</item>
+        <item name="strokeWidth">1.5dp</item>
+        <item name="android:textColor">@color/neon_green_primary</item>
+        <item name="android:textStyle">bold</item>
+        <item name="cornerRadius">@dimen/button_corner_radius</item>
+        <item name="rippleColor">@color/ripple_neon</item>
+    </style>
+
+    <!-- Sleek Dark Bottom Navigation Bar -->
+    <style name="Widget.NeonTycoon.BottomNav" parent="Widget.Material3.BottomNavigationView">
+        <item name="android:background">@color/bg_nav_bar</item>
+        <item name="itemIconTint">@color/nav_item_selector</item>
+        <item name="itemTextColor">@color/nav_item_selector</item>
+        <item name="itemActiveIndicatorStyle">@style/Widget.NeonTycoon.BottomNav.Indicator</item>
+        <item name="itemRippleColor">@color/ripple_neon</item>
+        <item name="elevation">12dp</item>
+    </style>
+
+    <style name="Widget.NeonTycoon.BottomNav.Indicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+        <item name="android:color">@color/neon_green_surface_tint</item>
+        <item name="android:width">56dp</item>
+        <item name="android:height">32dp</item>
+    </style>
+
+    <!-- Neon Green Linear Progress Indicator -->
+    <style name="Widget.NeonTycoon.LinearProgressIndicator" parent="Widget.Material3.LinearProgressIndicator">
+        <item name="indicatorColor">@color/neon_green_primary</item>
+        <item name="trackColor">@color/bg_dark_base</item>
+        <item name="trackCornerRadius">4dp</item>
+        <item name="trackThickness">8dp</item>
+    </style>
+</resources>

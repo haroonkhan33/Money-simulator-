@@ -1,0 +1,6 @@
+{
+  "name": "Money Tycoon",
+  "description": "Money Tycoon: Tap & Trade - financial empire simulator with tap to earn, floating text, business automation, live market trading with short/long leverage, real estate, daily missions, and secret developer admin menu.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
