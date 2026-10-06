@@ -47,6 +47,7 @@ fun DashboardScreen(
     val dailyMissions by viewModel.dailyMissions.collectAsState()
     val floatingTexts by viewModel.floatingTexts.collectAsState()
     val selectedAsset by viewModel.selectedMarketAsset.collectAsState()
+    val offlineIncomeReport by viewModel.offlineIncomeReport.collectAsState()
 
     var showMissionsDialog by remember { mutableStateOf(false) }
 
@@ -177,6 +178,16 @@ fun DashboardScreen(
                     missions = dailyMissions,
                     onClaimReward = { viewModel.claimMissionReward(it) },
                     onDismiss = { showMissionsDialog = false }
+                )
+            }
+
+            // Launch Popup: Offline Income Dialog
+            offlineIncomeReport?.let { report ->
+                com.example.ui.dialogs.OfflineIncomeDialog(
+                    report = report,
+                    onCollect = { multiplier ->
+                        viewModel.collectOfflineIncome(multiplier)
+                    }
                 )
             }
         }

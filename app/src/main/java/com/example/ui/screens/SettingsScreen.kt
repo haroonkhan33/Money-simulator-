@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.audio.TycoonSoundManager
 import com.example.viewmodel.TycoonUiState
 import com.example.viewmodel.TycoonViewModel
 
@@ -99,7 +100,10 @@ fun SettingsScreen(
                         }
                         Switch(
                             checked = soundEnabled,
-                            onCheckedChange = { soundEnabled = it },
+                            onCheckedChange = {
+                                soundEnabled = it
+                                TycoonSoundManager.isSoundEnabled = it
+                            },
                             colors = SwitchDefaults.colors(
                                 checkedThumbColor = Color(0xFF070B0E),
                                 checkedTrackColor = Color(0xFF00FF88)
@@ -224,8 +228,11 @@ fun SettingsScreen(
                         ) {
                             OutlinedTextField(
                                 value = secretCodeInput,
-                                onValueChange = {
-                                    secretCodeInput = it
+                                onValueChange = { newVal ->
+                                    if (newVal.length > secretCodeInput.length) {
+                                        TycoonSoundManager.playKeypadBeep(newVal.last())
+                                    }
+                                    secretCodeInput = newVal
                                     codeError = false
                                 },
                                 placeholder = { Text("Enter access code", color = Color(0xFF64748B), fontSize = 12.sp) },

@@ -4,10 +4,13 @@ import android.app.Application
 import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.audio.TycoonSoundManager
 import com.example.model.Business
 import com.example.model.DailyMission
 import com.example.model.FloatingText
 import com.example.model.MarketAsset
+import com.example.model.OfflineBusinessEarning
+import com.example.model.OfflineIncomeReport
 import com.example.model.Property
 import com.example.model.TradeDirection
 import com.example.model.TradePosition
@@ -58,10 +61,14 @@ class TycoonViewModel(application: Application) : AndroidViewModel(application) 
     private val _selectedMarketAsset = MutableStateFlow<MarketAsset?>(null)
     val selectedMarketAsset: StateFlow<MarketAsset?> = _selectedMarketAsset.asStateFlow()
 
+    private val _offlineIncomeReport = MutableStateFlow<OfflineIncomeReport?>(null)
+    val offlineIncomeReport: StateFlow<OfflineIncomeReport?> = _offlineIncomeReport.asStateFlow()
+
     private var floatingIdCounter = 0L
 
     init {
         loadInitialData()
+        calculateOfflineProgress()
         startGameLoop()
         startMarketSimulation()
     }
@@ -79,7 +86,7 @@ class TycoonViewModel(application: Application) : AndroidViewModel(application) 
             )
         }
 
-        // Initialize Businesses
+        // Initialize Businesses with persistent levels and managers
         val defaultBusinesses = listOf(
             Business("b1", "Cyber Lemonade & Cafe", "Retail", "☕", baseIncome = 4.0, baseCost = 15.0, managerCost = 250.0, cycleTimeSeconds = 1.0f, level = 1),
             Business("b2", "Autonomous Taxi Fleet", "Transport", "🚕", baseIncome = 24.0, baseCost = 200.0, managerCost = 1200.0, cycleTimeSeconds = 2.0f, level = 0),
@@ -89,10 +96,14 @@ class TycoonViewModel(application: Application) : AndroidViewModel(application) 
             Business("b6", "Autonomous Cargo Freight", "Logistics", "🚢", baseIncome = 7500.0, baseCost = 250000.0, managerCost = 800000.0, cycleTimeSeconds = 6.0f, level = 0),
             Business("b7", "Clean Fusion Power Grid", "Energy", "⚡", baseIncome = 32000.0, baseCost = 1500000.0, managerCost = 5000000.0, cycleTimeSeconds = 8.0f, level = 0),
             Business("b8", "Orbital Space Logistics", "Aerospace", "🚀", baseIncome = 150000.0, baseCost = 10000000.0, managerCost = 35000000.0, cycleTimeSeconds = 10.0f, level = 0)
-        )
+        ).map { b ->
+            val lvl = prefs.getInt("biz_${b.id}_lvl", b.level)
+            val mgr = prefs.getBoolean("biz_${b.id}_mgr", b.hasManager)
+            b.copy(level = lvl, hasManager = mgr)
+        }
         _businesses.value = defaultBusinesses
 
-        // Initialize Real Estate & Luxury Properties
+        // Initialize Real Estate & Luxury Properties with persistence
         val defaultProperties = listOf(
             Property("p1", "Suburban Family Villa", "Real Estate", 45000.0, 350.0, 20, "🏡"),
             Property("p2", "Cyberpunk Supercar", "Luxury Asset", 120000.0, 0.0, 15, "🏎️"),
@@ -102,7 +113,10 @@ class TycoonViewModel(application: Application) : AndroidViewModel(application) 
             Property("p6", "Commercial Mega-Tower", "Real Estate", 35000000.0, 240000.0, 80, "🏢"),
             Property("p7", "Private Tropical Atoll", "Real Estate", 120000000.0, 950000.0, 100, "🏝️"),
             Property("p8", "Gulfstream Private Jet", "Luxury Asset", 45000000.0, 0.0, 40, "✈️")
-        )
+        ).map { p ->
+            val purchased = prefs.getBoolean("prop_${p.id}_bought", false)
+            p.copy(isPurchased = purchased)
+        }
         _properties.value = defaultProperties
 
         // Initialize Market Assets
@@ -124,6 +138,61 @@ class TycoonViewModel(application: Application) : AndroidViewModel(application) 
             DailyMission("m5", "Real Estate Baron", "Acquire at least 1 property", 1, currentProgress = 0, rewardCash = 25000.0)
         )
         _dailyMissions.value = defaultMissions
+    }
+
+    private fun calculateOfflineProgress() {
+        val lastActive = prefs.getLong("last_active_timestamp", 0L)
+        val now = System.currentTimeMillis()
+
+        val elapsedSec = if (lastActive > 0L) {
+            ((now - lastActive) / 1000L).coerceIn(10L, 86400L * 2) // Max 48 hours
+        } else {
+            // First time launch: welcome seed offline progress of 150 seconds
+            150L
+        }
+
+        val breakdown = mutableListOf<OfflineBusinessEarning>()
+        var totalOffline = 0.0
+
+        _businesses.value.forEach { b ->
+            if (b.level > 0 && b.hasManager) {
+                val earned = b.incomePerSecond * elapsedSec
+                if (earned > 0) {
+                    totalOffline += earned
+                    breakdown.add(OfflineBusinessEarning(b.name, b.icon, earned))
+                }
+            }
+        }
+
+        // If no managers were unlocked yet (e.g. early game), calculate starter offline earnings from cafe
+        if (totalOffline <= 0.0) {
+            val starterRate = 4.0 // $4/sec
+            val starterTotal = (starterRate * (elapsedSec.coerceAtMost(300L))).coerceAtLeast(120.0)
+            totalOffline = starterTotal
+            breakdown.add(OfflineBusinessEarning("Cyber Lemonade & Cafe", "☕", starterTotal))
+        }
+
+        _offlineIncomeReport.value = OfflineIncomeReport(
+            offlineSeconds = elapsedSec,
+            totalCashEarned = totalOffline,
+            breakdown = breakdown
+        )
+    }
+
+    fun collectOfflineIncome(multiplier: Int) {
+        val report = _offlineIncomeReport.value ?: return
+        val finalAmount = report.totalCashEarned * multiplier
+        addCash(finalAmount)
+        _uiState.update { it.copy(totalEarnedFromBusinesses = it.totalEarnedFromBusinesses + finalAmount) }
+
+        if (multiplier > 1) {
+            TycoonSoundManager.playClaimReward()
+        } else {
+            TycoonSoundManager.playPassiveCashCollect()
+        }
+
+        _offlineIncomeReport.value = null
+        saveState()
     }
 
     private fun generateInitialHistory(base: Double): List<Float> {
@@ -212,6 +281,8 @@ class TycoonViewModel(application: Application) : AndroidViewModel(application) 
         val tapEarnings = (25.0 * tapMultiplier).coerceAtLeast(25.0)
 
         addCash(tapEarnings)
+        TycoonSoundManager.playCoinTap()
+        TycoonSoundManager.playFloatingTextPop()
 
         // Spawn floating text
         val newFloatingText = FloatingText(
@@ -254,6 +325,7 @@ class TycoonViewModel(application: Application) : AndroidViewModel(application) 
                     if (it.id == businessId) it.copy(level = it.level + 1) else it
                 }
             }
+            TycoonSoundManager.playUpgradeAsset()
             updateMissionProgress("m3", 1)
             saveState()
         }
@@ -267,6 +339,7 @@ class TycoonViewModel(application: Application) : AndroidViewModel(application) 
                     if (it.id == businessId) it.copy(hasManager = true) else it
                 }
             }
+            TycoonSoundManager.playManagerHired()
             saveState()
         }
     }
@@ -276,6 +349,8 @@ class TycoonViewModel(application: Application) : AndroidViewModel(application) 
         if (business.level <= 0) return
         val earnings = business.incomePerCycle
         addCash(earnings)
+        TycoonSoundManager.playCoinTap()
+        TycoonSoundManager.playFloatingTextPop()
 
         val newFloatingText = FloatingText(
             id = ++floatingIdCounter,
@@ -301,6 +376,7 @@ class TycoonViewModel(application: Application) : AndroidViewModel(application) 
                 }
             }
             _uiState.update { it.copy(creditScore = (it.creditScore + property.creditScoreBoost).coerceAtMost(850)) }
+            TycoonSoundManager.playPropertyUnlocked()
             updateMissionProgress("m5", 1)
             saveState()
         }
@@ -324,6 +400,13 @@ class TycoonViewModel(application: Application) : AndroidViewModel(application) 
         )
         _openPositions.update { it + newPosition }
         _uiState.update { it.copy(totalTradesCount = it.totalTradesCount + 1) }
+
+        if (direction == TradeDirection.LONG) {
+            TycoonSoundManager.playTradeBuyLong()
+        } else {
+            TycoonSoundManager.playTradeSellShort()
+        }
+
         updateMissionProgress("m2", 1)
         saveState()
         return true
@@ -337,6 +420,13 @@ class TycoonViewModel(application: Application) : AndroidViewModel(application) 
 
         addCash(returnAmount)
         _openPositions.update { it.filterNot { p -> p.id == positionId } }
+
+        if (pnl >= 0) {
+            TycoonSoundManager.playProfitRealized(pnl)
+        } else {
+            TycoonSoundManager.playLossTaken()
+        }
+
         saveState()
     }
 
@@ -345,8 +435,13 @@ class TycoonViewModel(application: Application) : AndroidViewModel(application) 
         _dailyMissions.update { list ->
             list.map { mission ->
                 if (mission.id == missionId && !mission.isClaimed) {
+                    val wasCompleted = mission.isCompleted
                     val newProgress = (mission.currentProgress + increment).coerceAtMost(mission.target)
-                    mission.copy(currentProgress = newProgress)
+                    val updated = mission.copy(currentProgress = newProgress)
+                    if (!wasCompleted && updated.isCompleted) {
+                        TycoonSoundManager.playMissionCompleted()
+                    }
+                    updated
                 } else {
                     mission
                 }
@@ -358,6 +453,7 @@ class TycoonViewModel(application: Application) : AndroidViewModel(application) 
         val mission = _dailyMissions.value.find { it.id == missionId } ?: return
         if (mission.isCompleted && !mission.isClaimed) {
             addCash(mission.rewardCash)
+            TycoonSoundManager.playClaimReward()
             _dailyMissions.update { list ->
                 list.map { if (it.id == missionId) it.copy(isClaimed = true) else it }
             }
@@ -367,7 +463,10 @@ class TycoonViewModel(application: Application) : AndroidViewModel(application) 
 
     // Navigation
     fun setSelectedTab(tab: Int) {
-        _uiState.update { it.copy(selectedTab = tab) }
+        if (_uiState.value.selectedTab != tab) {
+            TycoonSoundManager.playScreenTransition()
+            _uiState.update { it.copy(selectedTab = tab) }
+        }
     }
 
     // Secret Admin Developer Code
@@ -375,6 +474,7 @@ class TycoonViewModel(application: Application) : AndroidViewModel(application) 
         if (code.trim().equals("9ppp", ignoreCase = false)) {
             _uiState.update { it.copy(isDeveloperAdmin = true) }
             prefs.edit().putBoolean("is_admin", true).apply()
+            TycoonSoundManager.playAdminGranted()
             return true
         }
         return false
@@ -383,14 +483,17 @@ class TycoonViewModel(application: Application) : AndroidViewModel(application) 
     // Admin Controls
     fun adminAddMillion() {
         addCash(1_000_000.0)
+        TycoonSoundManager.playPassiveCashCollect()
     }
 
     fun adminAddBillion() {
         addCash(1_000_000_000.0)
+        TycoonSoundManager.playClaimReward()
     }
 
     fun adminUnlockAllManagers() {
         _businesses.update { list -> list.map { it.copy(hasManager = true) } }
+        TycoonSoundManager.playManagerHired()
         saveState()
     }
 
@@ -398,11 +501,13 @@ class TycoonViewModel(application: Application) : AndroidViewModel(application) 
         _businesses.update { list ->
             list.map { it.copy(level = it.level + 50, hasManager = true) }
         }
+        TycoonSoundManager.playUpgradeAsset()
         saveState()
     }
 
     fun adminResetProgress() {
         prefs.edit().clear().apply()
+        TycoonSoundManager.playProgressReset()
         loadInitialData()
     }
 
@@ -429,12 +534,21 @@ class TycoonViewModel(application: Application) : AndroidViewModel(application) 
     val monthlyCashFlow: Double
         get() = totalCashFlowPerSec * 30.0 * 86400.0
 
-    private fun saveState() {
-        prefs.edit()
+    fun saveState() {
+        val editor = prefs.edit()
             .putFloat("cash", _uiState.value.cash.toFloat())
             .putInt("total_taps", _uiState.value.totalTaps)
             .putBoolean("is_admin", _uiState.value.isDeveloperAdmin)
-            .apply()
+            .putLong("last_active_timestamp", System.currentTimeMillis())
+
+        _businesses.value.forEach { b ->
+            editor.putInt("biz_${b.id}_lvl", b.level)
+            editor.putBoolean("biz_${b.id}_mgr", b.hasManager)
+        }
+        _properties.value.forEach { p ->
+            editor.putBoolean("prop_${p.id}_bought", p.isPurchased)
+        }
+        editor.apply()
     }
 
     companion object {

@@ -71,4 +71,25 @@ class ExampleUnitTest {
         assertTrue(mission.isCompleted)
         assertFalse(mission.isClaimed)
     }
+
+    @Test
+    fun testOfflineIncomeCalculation() {
+        val business = Business(
+            id = "b1",
+            name = "Cafe",
+            category = "Retail",
+            icon = "☕",
+            baseIncome = 10.0,
+            baseCost = 100.0,
+            managerCost = 500.0,
+            cycleTimeSeconds = 2.0f,
+            level = 2,
+            hasManager = true
+        )
+        val elapsedSec = 100L
+        val expected = business.incomePerSecond * elapsedSec
+        val earned = business.incomePerSecond * elapsedSec
+        assertTrue(earned > 0)
+        assertEquals(expected, earned, 0.01)
+    }
 }

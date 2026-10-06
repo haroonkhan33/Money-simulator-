@@ -22,4 +22,14 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    override fun onPause() {
+        super.onPause()
+        viewModel.saveState()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        viewModel.saveState()
+    }
 }

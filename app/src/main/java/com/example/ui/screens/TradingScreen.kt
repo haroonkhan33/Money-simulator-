@@ -42,6 +42,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.audio.TycoonSoundManager
 import com.example.model.MarketAsset
 import com.example.model.TradeDirection
 import com.example.model.TradePosition
@@ -62,6 +63,7 @@ fun TradingScreen(
     var selectedDirection by remember { mutableStateOf(TradeDirection.LONG) }
     var selectedLeverage by remember { mutableIntStateOf(2) }
     var tradeMarginAmount by remember { mutableStateOf(100.0) }
+    var selectedInterval by remember { mutableStateOf("1m") }
 
     val currentAsset = selectedAsset ?: marketAssets.firstOrNull()
 
@@ -91,7 +93,10 @@ fun TradingScreen(
                                 if (isSelected) Color(0xFF00FF88) else Color(0xFF22303D),
                                 RoundedCornerShape(12.dp)
                             )
-                            .clickable { onSelectAsset(asset.symbol) }
+                            .clickable {
+                                TycoonSoundManager.playChartIntervalSwitch()
+                                onSelectAsset(asset.symbol)
+                            }
                             .padding(horizontal = 14.dp, vertical = 8.dp)
                     ) {
                         Column {
@@ -142,26 +147,63 @@ fun TradingScreen(
                                 )
                             }
 
-                            val isUp = currentAsset.change24h >= 0
-                            Box(
-                                modifier = Modifier
-                                    .background(
-                                        if (isUp) Color(0xFF0D291F) else Color(0xFF2B1218),
-                                        RoundedCornerShape(8.dp)
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                // Timeframe interval switchers: 1m, 5m, 1h
+                                Row(
+                                    modifier = Modifier
+                                        .background(Color(0xFF0A1118), RoundedCornerShape(8.dp))
+                                        .border(1.dp, Color(0xFF1B2B38), RoundedCornerShape(8.dp))
+                                        .padding(2.dp)
+                                ) {
+                                    listOf("1m", "5m", "1h").forEach { interval ->
+                                        val isCurrentInterval = selectedInterval == interval
+                                        Box(
+                                            modifier = Modifier
+                                                .background(
+                                                    if (isCurrentInterval) Color(0xFF00FF88) else Color.Transparent,
+                                                    RoundedCornerShape(6.dp)
+                                                )
+                                                .clickable {
+                                                    if (selectedInterval != interval) {
+                                                        selectedInterval = interval
+                                                        TycoonSoundManager.playChartIntervalSwitch()
+                                                    }
+                                                }
+                                                .padding(horizontal = 8.dp, vertical = 3.dp)
+                                        ) {
+                                            Text(
+                                                text = interval,
+                                                color = if (isCurrentInterval) Color(0xFF070B0E) else Color(0xFF94A3B8),
+                                                fontSize = 10.sp,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.width(8.dp))
+
+                                val isUp = currentAsset.change24h >= 0
+                                Box(
+                                    modifier = Modifier
+                                        .background(
+                                            if (isUp) Color(0xFF0D291F) else Color(0xFF2B1218),
+                                            RoundedCornerShape(8.dp)
+                                        )
+                                        .border(
+                                            1.dp,
+                                            if (isUp) Color(0xFF00FF88) else Color(0xFFFF3B5C),
+                                            RoundedCornerShape(8.dp)
+                                        )
+                                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                                ) {
+                                    Text(
+                                        text = "${if (isUp) "+" else ""}${String.format("%.2f", currentAsset.change24h)}%",
+                                        color = if (isUp) Color(0xFF00FF88) else Color(0xFFFF3B5C),
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.ExtraBold
                                     )
-                                    .border(
-                                        1.dp,
-                                        if (isUp) Color(0xFF00FF88) else Color(0xFFFF3B5C),
-                                        RoundedCornerShape(8.dp)
-                                    )
-                                    .padding(horizontal = 10.dp, vertical = 4.dp)
-                            ) {
-                                Text(
-                                    text = "${if (isUp) "+" else ""}${String.format("%.2f", currentAsset.change24h)}%",
-                                    color = if (isUp) Color(0xFF00FF88) else Color(0xFFFF3B5C),
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.ExtraBold
-                                )
+                                }
                             }
                         }
 
